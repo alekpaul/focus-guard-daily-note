@@ -327,6 +327,35 @@
       color: #e74c3c;
       margin-top: 6px;
     }
+
+    /* ---- Light Theme ---- */
+    @media (prefers-color-scheme: light) {
+      body { background: #f5f5f5; color: #333; }
+      .header h2 { color: #111; }
+      .toggle-slider { background: #ccc; }
+      .toggle-slider::before { background: #fff; }
+      .vault-status { background: #fff; border-color: #e0e0e0; color: #666; }
+      .streak-row { background: #fff; border-color: #e0e0e0; }
+      .streak-day .dot { background: #f0f0f5; border-color: #ddd; }
+      .streak-day .dot.done { background: #6c5ce7; border-color: #7c6cf7; color: #fff; }
+      .streak-day .dot.today { border-color: #bbb; }
+      .streak-day .dot.today.done { border-color: #9a8aff; }
+      .streak-count { color: #888; }
+      .streak-count .number { color: #111; }
+      .obsidian-link { background: #fff; border-color: #e0e0e0; }
+      .obsidian-link:hover { background: #f0f0ff; }
+      .section-label { color: #999; }
+      .site-list li { background: #fff; }
+      .site-list li .remove { color: #bbb; }
+      .add-row input { background: #fff; border-color: #ddd; color: #333; }
+      .add-row input::placeholder { color: #aaa; }
+      .setting-row { background: #fff; border-color: #e0e0e0; color: #666; }
+      .setting-row select { background: #f5f5f5; border-color: #ddd; color: #333; }
+      .onboarding p { color: #666; }
+      .onboarding .hint { color: #999; }
+      .onboarding input { background: #fff; border-color: #ddd; color: #333; }
+      .onboarding input::placeholder { color: #aaa; }
+    }
   </style>
 </head>
 <body>

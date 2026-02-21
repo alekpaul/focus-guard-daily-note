@@ -7,15 +7,23 @@ const blockedSiteEl = document.getElementById("blocked-site");
 
 let saveTimeout = null;
 
-// --- Obsidian URI (set after config loads) ---
+// --- Obsidian URI (updates to match currently displayed note) ---
 const today = new Date();
 const yyyy = today.getFullYear();
 const mm = String(today.getMonth() + 1).padStart(2, "0");
 const dd = String(today.getDate()).padStart(2, "0");
+const todayStr = `${yyyy}-${mm}-${dd}`;
+
+let currentVault = "Obsidian";
+
+function updateObsidianLink(dateStr) {
+  const filePath = `Progress/${dateStr || todayStr}`;
+  obsidianLink.href = `obsidian://open?vault=${encodeURIComponent(currentVault)}&file=${encodeURIComponent(filePath)}`;
+}
 
 function setObsidianLink(vaultName) {
-  const filePath = `Progress/${yyyy}-${mm}-${dd}`;
-  obsidianLink.href = `obsidian://open?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(filePath)}`;
+  currentVault = vaultName;
+  updateObsidianLink();
 }
 
 // --- Show blocked site ---
@@ -120,6 +128,7 @@ async function viewPastNote(dateStr) {
   noteTitle.textContent = formatDateLabel(dateStr);
   backToToday.style.display = "inline";
   saveStatusEl.textContent = "";
+  updateObsidianLink(dateStr);
 
   // Update selected dot
   document.querySelectorAll("#streak-days .dot").forEach((d) => {
@@ -135,6 +144,7 @@ async function returnToToday() {
   noteCard.classList.remove("past-note");
   noteTitle.textContent = "Today's Plan";
   backToToday.style.display = "none";
+  updateObsidianLink();
 
   document.querySelectorAll("#streak-days .dot").forEach((d) => {
     d.classList.remove("selected");

@@ -239,6 +239,30 @@
     }
 
     .footer a:hover { color: #666; text-decoration: underline; }
+
+    /* ---- Light Theme ---- */
+    @media (prefers-color-scheme: light) {
+      body { background: #fafafa; color: #333; }
+      .header h1 { color: #111; }
+      .blocked-site { background: #f0f0f5; border-color: #ddd; color: #666; }
+      .streak-day .dot { background: #f0f0f5; border-color: #ddd; }
+      .streak-day .dot.done { background: #6c5ce7; border-color: #7c6cf7; color: #fff; }
+      .streak-day .dot.today { border-color: #bbb; }
+      .streak-day .dot.today.done { border-color: #9a8aff; }
+      .streak-count { color: #888; }
+      .streak-count .number { color: #111; }
+      .note-card { background: #fff; border-color: #e0e0e0; }
+      .note-card.past-note { background: #fdf8f0; border-color: #d4b896; }
+      .note-card-header h2 { color: #999; }
+      .save-status { color: #ccc; }
+      .btn-ghost { background: #f5f5f5; color: #666; border-color: #ddd; }
+      .btn-ghost:hover { background: #eee; color: #444; }
+      .back-to-today { color: #888; }
+      .back-to-today:hover { color: #6c5ce7; }
+      .footer a { color: #bbb; }
+      .footer a:hover { color: #888; }
+      .setup-prompt p { color: #888; }
+    }
   </style>
 </head>
 <body>
