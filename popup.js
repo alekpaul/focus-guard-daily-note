@@ -73,14 +73,22 @@ function initMain(vaultName) {
     } catch {}
   })();
 
-  // --- Toggle ---
-  chrome.storage.sync.get(["blockedSites", "enabled"], (data) => {
+  // --- Bypass duration ---
+  const bypassSelect = document.getElementById("bypass-duration");
+
+  // --- Toggle + settings ---
+  chrome.storage.sync.get(["blockedSites", "enabled", "bypassMinutes"], (data) => {
     render(data.blockedSites || []);
     toggleEnabled.checked = data.enabled !== false;
+    bypassSelect.value = String(data.bypassMinutes || 5);
   });
 
   toggleEnabled.addEventListener("change", () => {
     chrome.storage.sync.set({ enabled: toggleEnabled.checked });
+  });
+
+  bypassSelect.addEventListener("change", () => {
+    chrome.storage.sync.set({ bypassMinutes: Number(bypassSelect.value) });
   });
 
   // --- Site list ---

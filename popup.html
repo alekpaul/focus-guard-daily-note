@@ -238,6 +238,32 @@
 
     .add-row button:hover { background: #5a4bd1; }
 
+    /* Settings row */
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: #1a1a2e;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: #7a7aaa;
+    }
+
+    .setting-row select {
+      background: #0f0f1e;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 12px;
+      padding: 4px 6px;
+      outline: none;
+    }
+
+    .setting-row select:focus { border-color: #6c5ce7; }
+
     /* Onboarding */
     .onboarding {
       text-align: center;
@@ -330,6 +356,17 @@
     </div>
 
     <a class="obsidian-link" id="open-obsidian" href="#">Open Today's Plan</a>
+
+    <div class="setting-row">
+      <span>Bypass duration</span>
+      <select id="bypass-duration">
+        <option value="1">1 min</option>
+        <option value="2">2 min</option>
+        <option value="5" selected>5 min</option>
+        <option value="10">10 min</option>
+        <option value="15">15 min</option>
+      </select>
+    </div>
 
     <p class="section-label">Blocked sites</p>
     <ul class="site-list" id="site-list"></ul>

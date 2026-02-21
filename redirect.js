@@ -79,10 +79,11 @@ const timer = setInterval(() => {
     bypassLink.addEventListener("click", (e) => {
       e.preventDefault();
       try {
-        const hostname = new URL(fromUrl).hostname;
-        chrome.storage.sync.get("tempAllowed", (data) => {
+        const hostname = new URL(fromUrl).hostname.replace(/^www\./, "");
+        chrome.storage.sync.get(["tempAllowed", "bypassMinutes"], (data) => {
           const allowed = data.tempAllowed || {};
-          allowed[hostname] = Date.now() + 5 * 60 * 1000;
+          const minutes = data.bypassMinutes || 5;
+          allowed[hostname] = Date.now() + minutes * 60 * 1000;
           chrome.storage.sync.set({ tempAllowed: allowed }, () => {
             window.location.href = fromUrl;
           });
