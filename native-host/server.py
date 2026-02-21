@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/python3
+#!/usr/bin/env python3
 """
 Tiny local HTTP server for Focus Guard.
 Serves Obsidian daily notes on localhost:19549.
@@ -10,7 +10,24 @@ import re
 from datetime import date, timedelta
 
 PORT = 19549
-VAULT = "/Users/olehpavliv/Library/Mobile Documents/iCloud~md~obsidian/Documents/Organized-notes"
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+
+
+def load_config():
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+
+def save_config(cfg):
+    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+        json.dump(cfg, f, indent=2)
+
+
+def get_vault():
+    cfg = load_config()
+    return cfg.get("vault", "")
 
 NOTE_TEMPLATE = """
 
@@ -29,11 +46,11 @@ NOTE_TEMPLATE = """
 
 def get_note_path():
     today = date.today().isoformat()
-    return os.path.join(VAULT, "Progress", f"{today}.md")
+    return os.path.join(get_vault(), "Progress", f"{today}.md")
 
 
 def note_path_for(d):
-    return os.path.join(VAULT, "Progress", f"{d.isoformat()}.md")
+    return os.path.join(get_vault(), "Progress", f"{d.isoformat()}.md")
 
 
 def is_note_meaningful(filepath):
@@ -128,7 +145,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self._json(200, {"ok": True})
             return
 
+        if self.path == "/config":
+            cfg = load_config()
+            self._json(200, {"ok": True, "vault": cfg.get("vault", ""), "vaultName": cfg.get("vaultName", "")})
+            return
+
         if self.path == "/streak":
+            if not get_vault():
+                self._json(400, {"ok": False, "error": "vault not configured"})
+                return
             self._json(200, {"ok": True, **calculate_streak()})
             return
 
@@ -153,6 +178,21 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self._json(404, {"ok": False, "error": "not found"})
 
     def do_POST(self):
+        if self.path == "/config":
+            length = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(length))
+            vault_path = body.get("vault", "").strip()
+            if not vault_path or not os.path.isdir(vault_path):
+                self._json(400, {"ok": False, "error": "Folder not found"})
+                return
+            vault_name = os.path.basename(vault_path)
+            cfg = load_config()
+            cfg["vault"] = vault_path
+            cfg["vaultName"] = vault_name
+            save_config(cfg)
+            self._json(200, {"ok": True, "vault": vault_path, "vaultName": vault_name})
+            return
+
         if self.path == "/note":
             length = int(self.headers.get("Content-Length", 0))
             body = json.loads(self.rfile.read(length))

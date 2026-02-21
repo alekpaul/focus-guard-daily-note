@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/python3
+#!/usr/bin/env python3
 """
 Native messaging host for Focus Guard Chrome extension.
 """
@@ -15,7 +15,15 @@ def log(msg):
     with open(LOG, "a") as f:
         f.write(msg + "\n")
 
-VAULT = "/Users/olehpavliv/Library/Mobile Documents/iCloud~md~obsidian/Documents/Organized-notes"
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+
+def _load_vault():
+    if os.path.exists(CONFIG_PATH):
+        with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+            return json.load(f).get("vault", "")
+    return ""
+
+VAULT = _load_vault()
 
 NOTE_TEMPLATE = """
 

@@ -237,35 +237,107 @@
     }
 
     .add-row button:hover { background: #5a4bd1; }
+
+    /* Onboarding */
+    .onboarding {
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .onboarding p {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .onboarding .hint {
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    .onboarding input {
+      width: 100%;
+      padding: 8px 10px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 12px;
+      outline: none;
+      margin-bottom: 8px;
+      font-family: monospace;
+    }
+
+    .onboarding input:focus { border-color: #6c5ce7; }
+    .onboarding input::placeholder { color: #555; }
+
+    .onboarding button {
+      width: 100%;
+      padding: 10px;
+      background: #6c5ce7;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .onboarding button:hover { background: #5a4bd1; }
+
+    .onboarding .error {
+      font-size: 11px;
+      color: #e74c3c;
+      margin-top: 6px;
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h2>Focus Guard</h2>
-    <label class="toggle">
-      <input type="checkbox" id="toggle-enabled" checked>
-      <span class="toggle-slider"></span>
-    </label>
+  <!-- Onboarding (shown when vault not configured) -->
+  <div id="onboarding-view" style="display:none;">
+    <div class="header">
+      <h2>Focus Guard</h2>
+    </div>
+    <div class="onboarding">
+      <p>Set your Obsidian vault folder<br>to get started</p>
+      <p class="hint">Paste the full path to your vault folder</p>
+      <input type="text" id="vault-path-input" placeholder="/Users/you/Documents/MyVault">
+      <button id="save-vault-btn">Connect Vault</button>
+      <p class="error" id="vault-error" style="display:none;"></p>
+    </div>
   </div>
 
-  <div class="vault-status">
-    <span class="dot loading" id="vault-dot"></span>
-    <span id="vault-label">Checking vault...</span>
-  </div>
+  <!-- Main UI (shown when configured) -->
+  <div id="main-view" style="display:none;">
+    <div class="header">
+      <h2>Focus Guard</h2>
+      <label class="toggle">
+        <input type="checkbox" id="toggle-enabled" checked>
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
 
-  <div class="streak-row" id="streak-row">
-    <div class="streak-days" id="streak-days"></div>
-    <div class="streak-count"><span class="number" id="streak-number">0</span> day<span id="streak-unit">s</span> streak</div>
-  </div>
+    <div class="vault-status">
+      <span class="dot loading" id="vault-dot"></span>
+      <span id="vault-label">Checking vault...</span>
+    </div>
 
-  <a class="obsidian-link" id="open-obsidian" href="#">Open Today's Plan</a>
+    <div class="streak-row" id="streak-row">
+      <div class="streak-days" id="streak-days"></div>
+      <div class="streak-count"><span class="number" id="streak-number">0</span> day<span id="streak-unit">s</span> streak</div>
+    </div>
 
-  <p class="section-label">Blocked sites</p>
-  <ul class="site-list" id="site-list"></ul>
+    <a class="obsidian-link" id="open-obsidian" href="#">Open Today's Plan</a>
 
-  <div class="add-row">
-    <input type="text" id="new-site" placeholder="e.g. linkedin.com">
-    <button id="add-btn">Add</button>
+    <p class="section-label">Blocked sites</p>
+    <ul class="site-list" id="site-list"></ul>
+
+    <div class="add-row">
+      <input type="text" id="new-site" placeholder="e.g. linkedin.com">
+      <button id="add-btn">Add</button>
+    </div>
   </div>
 
   <script src="vault.js"></script>

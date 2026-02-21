@@ -7,14 +7,16 @@ const blockedSiteEl = document.getElementById("blocked-site");
 
 let saveTimeout = null;
 
-// --- Obsidian URI ---
+// --- Obsidian URI (set after config loads) ---
 const today = new Date();
 const yyyy = today.getFullYear();
 const mm = String(today.getMonth() + 1).padStart(2, "0");
 const dd = String(today.getDate()).padStart(2, "0");
-const vault = "Organized-notes";
-const filePath = `Progress/${yyyy}-${mm}-${dd}`;
-obsidianLink.href = `obsidian://open?vault=${encodeURIComponent(vault)}&file=${encodeURIComponent(filePath)}`;
+
+function setObsidianLink(vaultName) {
+  const filePath = `Progress/${yyyy}-${mm}-${dd}`;
+  obsidianLink.href = `obsidian://open?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(filePath)}`;
+}
 
 // --- Show blocked site ---
 const params = new URLSearchParams(window.location.search);
@@ -140,5 +142,11 @@ async function loadNote() {
 }
 
 // --- Init ---
-loadNote();
-loadStreak();
+(async () => {
+  try {
+    const cfg = await getConfig();
+    setObsidianLink(cfg.vaultName || "Obsidian");
+  } catch {}
+  loadNote();
+  loadStreak();
+})();
