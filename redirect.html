@@ -104,6 +104,20 @@
       border-color: #9a8aff;
     }
 
+    .streak-day .dot.done {
+      cursor: pointer;
+    }
+
+    .streak-day .dot.done:hover {
+      transform: scale(1.15);
+      transition: transform 0.15s;
+    }
+
+    .streak-day .dot.selected {
+      box-shadow: 0 0 0 2px #9a8aff;
+      transform: scale(1.15);
+    }
+
     .streak-count {
       font-size: 13px;
       font-weight: 600;
@@ -123,6 +137,23 @@
       padding: 20px 24px;
       margin-bottom: 16px;
       min-height: 180px;
+      transition: border-color 0.3s, background 0.3s;
+    }
+
+    .note-card.past-note {
+      border-color: #8b7355;
+      background: #1a1812;
+    }
+
+    .back-to-today {
+      font-size: 12px;
+      color: #7a7aaa;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .back-to-today:hover {
+      color: #9a8aff;
     }
 
     .note-card-header {
@@ -224,8 +255,11 @@
 
     <div class="note-card">
       <div class="note-card-header">
-        <h2>Today's Plan</h2>
-        <span class="save-status" id="save-status"></span>
+        <h2 id="note-title">Today's Plan</h2>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="save-status" id="save-status"></span>
+          <a href="#" id="back-to-today" class="back-to-today" style="display:none;">Back to today</a>
+        </div>
       </div>
 
       <!-- Shown only if native host is not set up -->

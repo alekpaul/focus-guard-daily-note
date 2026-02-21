@@ -64,7 +64,20 @@ function initMain(vaultName) {
         const el = document.createElement("div");
         el.className = "streak-day";
         const cls = ["dot", day.done && "done", day.isToday && "today"].filter(Boolean).join(" ");
-        el.innerHTML = `<span class="label">${day.label}</span><div class="${cls}">${day.done ? "\u2713" : ""}</div>`;
+        const dotEl = document.createElement("div");
+        dotEl.className = cls;
+        dotEl.textContent = day.done ? "\u2713" : "";
+
+        if (day.done) {
+          dotEl.addEventListener("click", () => {
+            const filePath = `Progress/${day.date}`;
+            const uri = `obsidian://open?vault=${encodeURIComponent(vaultName)}&file=${encodeURIComponent(filePath)}`;
+            chrome.tabs.create({ url: uri });
+          });
+        }
+
+        el.innerHTML = `<span class="label">${day.label}</span>`;
+        el.appendChild(dotEl);
         container.appendChild(el);
       });
       document.getElementById("streak-number").textContent = data.currentStreak;

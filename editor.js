@@ -628,6 +628,20 @@ class BlockEditor {
     this._emitChange();
   }
 
+  // --- Read-only mode ---
+  setReadOnly(readOnly) {
+    this.readOnly = readOnly;
+    this.container.classList.toggle("read-only", readOnly);
+    this.container.querySelectorAll(".block-content").forEach((el) => {
+      el.contentEditable = readOnly ? "false" : "true";
+    });
+    const addBtn = this.container.querySelector(".add-block-btn");
+    if (addBtn) addBtn.style.display = readOnly ? "none" : "";
+    this.container.querySelectorAll(".block-handle").forEach((el) => {
+      el.style.display = readOnly ? "none" : "";
+    });
+  }
+
   // --- Change notification ---
   _emitChange() {
     this.onChange(this.blocksToMarkdown());

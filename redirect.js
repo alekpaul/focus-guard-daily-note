@@ -34,6 +34,7 @@ const editor = new BlockEditor(editorContainer, {
 
 // --- Debounced auto-save ---
 function debouncedSave(md) {
+  if (viewingDate) return; // Don't save when viewing past notes
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(() => doSave(md), 600);
 }
@@ -98,6 +99,53 @@ const timer = setInterval(() => {
 }, 1000);
 
 // --- Streak UI ---
+const noteTitle = document.getElementById("note-title");
+const backToToday = document.getElementById("back-to-today");
+const noteCard = document.querySelector(".note-card");
+let viewingDate = null; // null = today (editable)
+
+function formatDateLabel(dateStr) {
+  const d = new Date(dateStr + "T12:00:00");
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+async function viewPastNote(dateStr) {
+  const content = await readNote(dateStr);
+  if (content === null) return;
+
+  viewingDate = dateStr;
+  editor.load(content);
+  editor.setReadOnly(true);
+  noteCard.classList.add("past-note");
+  noteTitle.textContent = formatDateLabel(dateStr);
+  backToToday.style.display = "inline";
+  saveStatusEl.textContent = "";
+
+  // Update selected dot
+  document.querySelectorAll("#streak-days .dot").forEach((d) => {
+    d.classList.toggle("selected", d.dataset.date === dateStr);
+  });
+}
+
+async function returnToToday() {
+  viewingDate = null;
+  const res = await createTodayNote();
+  editor.load(res.content);
+  editor.setReadOnly(false);
+  noteCard.classList.remove("past-note");
+  noteTitle.textContent = "Today's Plan";
+  backToToday.style.display = "none";
+
+  document.querySelectorAll("#streak-days .dot").forEach((d) => {
+    d.classList.remove("selected");
+  });
+}
+
+backToToday.addEventListener("click", (e) => {
+  e.preventDefault();
+  returnToToday();
+});
+
 async function loadStreak() {
   try {
     const data = await getStreak();
@@ -108,7 +156,23 @@ async function loadStreak() {
       const el = document.createElement("div");
       el.className = "streak-day";
       const cls = ["dot", day.done && "done", day.isToday && "today"].filter(Boolean).join(" ");
-      el.innerHTML = `<span class="label">${day.label}</span><div class="${cls}">${day.done ? "\u2713" : ""}</div>`;
+      const dotEl = document.createElement("div");
+      dotEl.className = cls;
+      dotEl.dataset.date = day.date;
+      dotEl.textContent = day.done ? "\u2713" : "";
+
+      if (day.done) {
+        dotEl.addEventListener("click", () => {
+          if (day.isToday) {
+            returnToToday();
+          } else {
+            viewPastNote(day.date);
+          }
+        });
+      }
+
+      el.innerHTML = `<span class="label">${day.label}</span>`;
+      el.appendChild(dotEl);
       container.appendChild(el);
     });
 

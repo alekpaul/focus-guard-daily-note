@@ -157,6 +157,18 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self._json(200, {"ok": True, **calculate_streak()})
             return
 
+        # Read-only access to a specific date's note
+        note_date_match = re.match(r"^/note/(\d{4}-\d{2}-\d{2})$", self.path)
+        if note_date_match:
+            date_str = note_date_match.group(1)
+            path = os.path.join(get_vault(), "Progress", f"{date_str}.md")
+            if os.path.exists(path):
+                with open(path, "r", encoding="utf-8") as f:
+                    self._json(200, {"ok": True, "content": f.read()})
+            else:
+                self._json(404, {"ok": False, "error": "Note not found"})
+            return
+
         if self.path == "/note":
             path = get_note_path()
             if os.path.exists(path):

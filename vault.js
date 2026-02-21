@@ -9,6 +9,13 @@ async function readTodayNote() {
   return data.content;
 }
 
+async function readNote(date) {
+  const res = await fetch(API + "/note/" + date);
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data.ok ? data.content : null;
+}
+
 async function saveTodayNote(content) {
   await fetch(API + "/note", {
     method: "POST",
