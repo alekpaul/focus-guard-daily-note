@@ -1,0 +1,221 @@
+/* ---- Block Editor ---- */
+.editor {
+  min-height: 200px;
+  padding: 4px 0;
+  font-size: 15px;
+}
+
+/* Individual block row */
+.block {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  border-radius: 6px;
+  transition: background 0.1s;
+  margin: 1px -8px;
+  padding: 1px 8px;
+}
+
+.block:hover { background: #1a1a1a; }
+.block:hover .block-handle { opacity: 0.5; }
+
+/* Drag handle */
+.block-handle {
+  opacity: 0;
+  cursor: grab;
+  padding: 5px 4px 4px 0;
+  color: #444;
+  font-size: 12px;
+  line-height: 1;
+  user-select: none;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.block-handle:hover { opacity: 1 !important; color: #888; }
+.block.dragging { opacity: 0.4; }
+
+.block.drag-over-top { box-shadow: 0 -2px 0 0 #6c5ce7; }
+.block.drag-over-bottom { box-shadow: 0 2px 0 0 #6c5ce7; }
+
+/* Block left element: checkbox or bullet */
+.block-prefix {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: calc(15px * 1.7);
+  margin-top: 4px;
+  min-width: 26px;
+}
+
+.block-prefix input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid #444;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 0;
+  position: relative;
+  background: transparent;
+  transition: all 0.15s ease;
+}
+
+.block-prefix input[type="checkbox"]:hover {
+  border-color: #6c5ce7;
+  background: rgba(108, 92, 231, 0.08);
+}
+
+.block-prefix input[type="checkbox"]:checked {
+  background: #6c5ce7;
+  border-color: #6c5ce7;
+}
+
+.block-prefix input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 9px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.block-prefix .bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #555;
+  margin-left: 7px;
+}
+
+/* Editable content */
+.block-content {
+  flex: 1;
+  outline: none;
+  padding: 4px 6px;
+  border-radius: 4px;
+  line-height: 1.7;
+  color: #d4d4d4;
+  font-size: 15px;
+  min-height: 1.7em;
+  word-break: break-word;
+  caret-color: #6c5ce7;
+}
+
+.block-content:empty::before {
+  content: attr(data-placeholder);
+  color: #3a3a3a;
+  pointer-events: none;
+}
+
+/* Type-specific styles */
+.block[data-type="heading"] .block-content {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e0e0e0;
+  padding-top: 16px;
+  padding-bottom: 2px;
+}
+
+.block:first-child[data-type="heading"] .block-content {
+  padding-top: 4px;
+}
+
+.block[data-type="task"] .block-content {
+  font-size: 15px;
+  color: #d4d4d4;
+}
+
+.block[data-type="task"].checked .block-content {
+  text-decoration: line-through;
+  color: #555;
+}
+
+.block[data-type="paragraph"] .block-content {
+  color: #b0b0b0;
+}
+
+/* ---- Slash Menu ---- */
+.slash-menu {
+  position: fixed;
+  background: #1c1c1c;
+  border: 1px solid #333;
+  border-radius: 10px;
+  padding: 4px;
+  z-index: 1000;
+  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  animation: menuFadeIn 0.1s ease-out;
+}
+
+@keyframes menuFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slash-menu-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #555;
+  padding: 6px 12px 4px;
+}
+
+.slash-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #ccc;
+  transition: background 0.1s;
+}
+
+.slash-menu-item:hover,
+.slash-menu-item.active {
+  background: #6c5ce7;
+  color: #fff;
+}
+
+.slash-menu-item .icon {
+  font-size: 16px;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.slash-menu-item .desc {
+  font-size: 12px;
+  color: #888;
+}
+
+.slash-menu-item:hover .desc,
+.slash-menu-item.active .desc {
+  color: rgba(255,255,255,0.7);
+}
+
+/* Add block button */
+.add-block-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  margin: 4px -8px 0;
+  border: none;
+  background: none;
+  color: #333;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color 0.15s;
+  width: calc(100% + 16px);
+}
+
+.add-block-btn:hover { color: #666; }
+.add-block-btn .plus { font-size: 18px; }

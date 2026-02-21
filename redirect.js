@@ -1,0 +1,144 @@
+// --- Elements ---
+const setupView = document.getElementById("setup-view");
+const editorContainer = document.getElementById("editor-container");
+const saveStatusEl = document.getElementById("save-status");
+const obsidianLink = document.getElementById("open-obsidian");
+const blockedSiteEl = document.getElementById("blocked-site");
+
+let saveTimeout = null;
+
+// --- Obsidian URI ---
+const today = new Date();
+const yyyy = today.getFullYear();
+const mm = String(today.getMonth() + 1).padStart(2, "0");
+const dd = String(today.getDate()).padStart(2, "0");
+const vault = "Organized-notes";
+const filePath = `Progress/${yyyy}-${mm}-${dd}`;
+obsidianLink.href = `obsidian://open?vault=${encodeURIComponent(vault)}&file=${encodeURIComponent(filePath)}`;
+
+// --- Show blocked site ---
+const params = new URLSearchParams(window.location.search);
+const fromUrl = params.get("from") || "";
+try {
+  blockedSiteEl.textContent = new URL(fromUrl).hostname;
+} catch {
+  blockedSiteEl.textContent = "distracting site";
+}
+
+// --- Block Editor ---
+const editor = new BlockEditor(editorContainer, {
+  onChange: (md) => debouncedSave(md),
+});
+
+// --- Debounced auto-save ---
+function debouncedSave(md) {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => doSave(md), 600);
+}
+
+async function doSave(md) {
+  showStatus("Saving...", "saving");
+  try {
+    await saveTodayNote(md);
+    showStatus("Saved", "saved");
+  } catch (e) {
+    showStatus("Save failed", "error");
+  }
+}
+
+function showStatus(text, cls) {
+  saveStatusEl.textContent = text;
+  saveStatusEl.className = "save-status " + cls;
+  if (cls === "saved") {
+    setTimeout(() => {
+      if (saveStatusEl.textContent === "Saved") {
+        saveStatusEl.textContent = "";
+        saveStatusEl.className = "save-status";
+      }
+    }, 2000);
+  }
+}
+
+// --- Go back ---
+document.getElementById("go-back").addEventListener("click", () => {
+  if (history.length > 1) history.back();
+  else window.close();
+});
+
+// --- Bypass with cooldown ---
+const bypassLink = document.getElementById("bypass-link");
+let countdown = 5;
+
+const timer = setInterval(() => {
+  countdown--;
+  if (countdown <= 0) {
+    clearInterval(timer);
+    bypassLink.textContent = "continue anyway";
+    bypassLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      try {
+        const hostname = new URL(fromUrl).hostname;
+        chrome.storage.sync.get("tempAllowed", (data) => {
+          const allowed = data.tempAllowed || {};
+          allowed[hostname] = Date.now() + 5 * 60 * 1000;
+          chrome.storage.sync.set({ tempAllowed: allowed }, () => {
+            window.location.href = fromUrl;
+          });
+        });
+      } catch {
+        window.location.href = fromUrl;
+      }
+    });
+  } else {
+    bypassLink.textContent = `continue anyway (${countdown}s)`;
+  }
+}, 1000);
+
+// --- Streak UI ---
+async function loadStreak() {
+  try {
+    const data = await getStreak();
+    const container = document.getElementById("streak-days");
+    const row = document.getElementById("streak-row");
+
+    data.days.forEach((day) => {
+      const el = document.createElement("div");
+      el.className = "streak-day";
+      const cls = ["dot", day.done && "done", day.isToday && "today"].filter(Boolean).join(" ");
+      el.innerHTML = `<span class="label">${day.label}</span><div class="${cls}">${day.done ? "\u2713" : ""}</div>`;
+      container.appendChild(el);
+    });
+
+    document.getElementById("streak-number").textContent = data.currentStreak;
+    document.getElementById("streak-unit").textContent = data.currentStreak === 1 ? "" : "s";
+    row.style.display = "flex";
+  } catch {}
+}
+
+// --- Load note into editor ---
+async function loadNote() {
+  try {
+    const res = await createTodayNote();
+    setupView.style.display = "none";
+    editorContainer.style.display = "";
+    editor.load(res.content);
+    if (res.created) {
+      const carried = res.carriedTasks || 0;
+      if (carried > 0) {
+        showStatus(`Created note + ${carried} task${carried === 1 ? "" : "s"} carried over`, "saved");
+      } else {
+        showStatus("Created today's note", "saved");
+      }
+    }
+  } catch (e) {
+    // Native host not available — show error details
+    setupView.querySelector("p").innerHTML =
+      'Native host not connected.<br><code style="background:#1a1a2e;padding:4px 8px;border-radius:4px;color:#e74c3c;font-size:12px;display:block;margin-top:8px;word-break:break-all;">' +
+      (e.message || String(e)) + '</code>';
+    setupView.querySelector("button").style.display = "none";
+  }
+}
+
+// --- Init ---
+loadNote();
+loadStreak();
