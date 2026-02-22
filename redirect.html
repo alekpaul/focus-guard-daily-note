@@ -186,12 +186,60 @@
       padding: 32px 16px;
     }
 
+    .setup-prompt .state-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .setup-prompt h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
     .setup-prompt p {
       font-size: 14px;
       color: #888;
       margin-bottom: 16px;
       line-height: 1.5;
     }
+
+    .setup-prompt .hint {
+      font-size: 12px;
+      color: #555;
+    }
+
+    .setup-prompt .retry-btn {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 8px 20px;
+      background: #6c5ce7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .setup-prompt .retry-btn:hover { background: #5a4bd1; }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    .loading-dots span {
+      animation: pulse-dot 1.4s ease-in-out infinite;
+      font-size: 20px;
+      color: #6c5ce7;
+      margin: 0 2px;
+    }
+
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
 
     /* Buttons */
     .actions {
@@ -241,29 +289,40 @@
     .footer a:hover { color: #666; text-decoration: underline; }
 
     /* ---- Light Theme ---- */
-    @media (prefers-color-scheme: light) {
-      body { background: #fafafa; color: #333; }
-      .header h1 { color: #111; }
-      .blocked-site { background: #f0f0f5; border-color: #ddd; color: #666; }
-      .streak-day .dot { background: #f0f0f5; border-color: #ddd; }
-      .streak-day .dot.done { background: #6c5ce7; border-color: #7c6cf7; color: #fff; }
-      .streak-day .dot.today { border-color: #bbb; }
-      .streak-day .dot.today.done { border-color: #9a8aff; }
-      .streak-count { color: #888; }
-      .streak-count .number { color: #111; }
-      .note-card { background: #fff; border-color: #e0e0e0; }
-      .note-card.past-note { background: #fdf8f0; border-color: #d4b896; }
-      .note-card-header h2 { color: #999; }
-      .save-status { color: #ccc; }
-      .btn-ghost { background: #f5f5f5; color: #666; border-color: #ddd; }
-      .btn-ghost:hover { background: #eee; color: #444; }
-      .back-to-today { color: #888; }
-      .back-to-today:hover { color: #6c5ce7; }
-      .footer a { color: #bbb; }
-      .footer a:hover { color: #888; }
-      .setup-prompt p { color: #888; }
-    }
+    html.light body { background: #fafafa; color: #333; }
+    html.light .header h1 { color: #111; }
+    html.light .blocked-site { background: #f0f0f5; border-color: #ddd; color: #666; }
+    html.light .streak-day .dot { background: #f0f0f5; border-color: #ddd; }
+    html.light .streak-day .dot.done { background: #6c5ce7; border-color: #7c6cf7; color: #fff; }
+    html.light .streak-day .dot.today { border-color: #bbb; }
+    html.light .streak-day .dot.today.done { border-color: #9a8aff; }
+    html.light .streak-count { color: #888; }
+    html.light .streak-count .number { color: #111; }
+    html.light .note-card { background: #fff; border-color: #e0e0e0; }
+    html.light .note-card.past-note { background: #fdf8f0; border-color: #d4b896; }
+    html.light .note-card-header h2 { color: #999; }
+    html.light .save-status { color: #ccc; }
+    html.light .btn-ghost { background: #f5f5f5; color: #666; border-color: #ddd; }
+    html.light .btn-ghost:hover { background: #eee; color: #444; }
+    html.light .back-to-today { color: #888; }
+    html.light .back-to-today:hover { color: #6c5ce7; }
+    html.light .footer a { color: #bbb; }
+    html.light .footer a:hover { color: #888; }
+    html.light .setup-prompt p { color: #888; }
+    html.light .setup-prompt h3 { color: #111; }
+    html.light .setup-prompt .hint { color: #999; }
+    html.light .setup-prompt .retry-btn { background: #6c5ce7; }
+    html.light .setup-prompt .retry-btn:hover { background: #5a4bd1; }
   </style>
+  <script>
+    (function() {
+      const mq = window.matchMedia('(prefers-color-scheme: light)');
+      function apply() { document.documentElement.classList.toggle('light', mq.matches); }
+      apply();
+      mq.addEventListener('change', apply);
+      setInterval(apply, 1000);
+    })();
+  </script>
 </head>
 <body>
   <div class="container">
@@ -286,10 +345,14 @@
         </div>
       </div>
 
-      <!-- Shown only if native host is not set up -->
+      <!-- Shown while loading / on error -->
       <div class="setup-prompt" id="setup-view">
-        <p>Loading your plan...</p>
-        <button class="btn btn-primary" style="display:none;"></button>
+        <div class="state-icon" id="state-icon">
+          <div class="loading-dots"><span>·</span><span>·</span><span>·</span></div>
+        </div>
+        <h3 id="state-title">Getting your plan ready</h3>
+        <p id="state-message">Just a moment while we connect to your vault</p>
+        <button class="retry-btn" id="retry-btn" style="display:none;" onclick="location.reload()">Try again</button>
       </div>
 
       <!-- Block editor container -->

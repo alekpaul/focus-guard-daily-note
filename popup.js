@@ -9,7 +9,7 @@ document.getElementById("save-vault-btn").addEventListener("click", async () => 
 
   const path = input.value.trim();
   if (!path) {
-    errorEl.textContent = "Please enter a path";
+    errorEl.textContent = "Enter your vault's folder path to continue";
     errorEl.style.display = "block";
     return;
   }
@@ -17,13 +17,13 @@ document.getElementById("save-vault-btn").addEventListener("click", async () => 
   try {
     const res = await saveConfig(path);
     if (!res.ok) {
-      errorEl.textContent = res.error || "Could not connect";
+      errorEl.textContent = res.error || "Couldn't find a vault at that path — double-check and try again";
       errorEl.style.display = "block";
       return;
     }
     showMain(res.vaultName);
   } catch (e) {
-    errorEl.textContent = "Server not running — run setup.sh first";
+    errorEl.innerHTML = "Can't reach the local server.<br>Make sure it's running and try again.";
     errorEl.style.display = "block";
   }
 });
@@ -158,9 +158,16 @@ function initMain(vaultName) {
       onboardingView.style.display = "block";
     }
   } catch {
-    // Server not running
+    // Server not running — show friendly message
     onboardingView.style.display = "block";
-    document.getElementById("vault-error").textContent = "Server not running — run setup.sh first";
-    document.getElementById("vault-error").style.display = "block";
+    const onboarding = onboardingView.querySelector(".onboarding");
+    onboarding.innerHTML = `
+      <div class="server-down-msg">
+        <div class="icon">🔌</div>
+        <p class="title">Server isn't running yet</p>
+        <p>Start the Focus Guard server, then reopen this popup. Your vault will be ready to connect.</p>
+        <a href="https://github.com/alekpaul/focus-guard-daily-note#setup" target="_blank" style="color:#9a8aff;font-size:11px;margin-top:6px;display:inline-block;">Need help? View setup guide →</a>
+      </div>
+    `;
   }
 })();

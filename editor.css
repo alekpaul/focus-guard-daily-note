@@ -75,13 +75,13 @@
 .block-prefix input[type="checkbox"]:checked::after {
   content: '';
   position: absolute;
-  left: 5px;
-  top: 2px;
+  left: 50%;
+  top: 45%;
   width: 5px;
   height: 9px;
   border: solid #fff;
   border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+  transform: translate(-50%, -55%) rotate(45deg);
 }
 
 .block-prefix .bullet {
@@ -221,22 +221,20 @@
 .add-block-btn .plus { font-size: 18px; }
 
 /* ---- Light Theme ---- */
-@media (prefers-color-scheme: light) {
-  .block:hover { background: #f5f5f5; }
-  .block-handle { color: #bbb; }
-  .block-handle:hover { color: #666 !important; }
-  .block-prefix input[type="checkbox"] { border-color: #ccc; }
-  .block-prefix .bullet { background: #999; }
-  .block-content { color: #333; caret-color: #6c5ce7; }
-  .block-content:empty::before { color: #ccc; }
-  .block[data-type="heading"] .block-content { color: #111; }
-  .block[data-type="task"] .block-content { color: #333; }
-  .block[data-type="task"].checked .block-content { color: #aaa; }
-  .block[data-type="paragraph"] .block-content { color: #555; }
-  .slash-menu { background: #fff; border-color: #ddd; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
-  .slash-menu-label { color: #999; }
-  .slash-menu-item { color: #333; }
-  .slash-menu-item .desc { color: #999; }
-  .add-block-btn { color: #bbb; }
-  .add-block-btn:hover { color: #888; }
-}
+html.light .block:hover { background: #f5f5f5; }
+html.light .block-handle { color: #bbb; }
+html.light .block-handle:hover { color: #666 !important; }
+html.light .block-prefix input[type="checkbox"] { border-color: #ccc; }
+html.light .block-prefix .bullet { background: #999; }
+html.light .block-content { color: #333; caret-color: #6c5ce7; }
+html.light .block-content:empty::before { color: #ccc; }
+html.light .block[data-type="heading"] .block-content { color: #111; }
+html.light .block[data-type="task"] .block-content { color: #333; }
+html.light .block[data-type="task"].checked .block-content { color: #aaa; }
+html.light .block[data-type="paragraph"] .block-content { color: #555; }
+html.light .slash-menu { background: #fff; border-color: #ddd; box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+html.light .slash-menu-label { color: #999; }
+html.light .slash-menu-item { color: #333; }
+html.light .slash-menu-item .desc { color: #999; }
+html.light .add-block-btn { color: #bbb; }
+html.light .add-block-btn:hover { color: #888; }

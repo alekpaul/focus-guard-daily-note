@@ -208,11 +208,27 @@ async function loadNote() {
       }
     }
   } catch (e) {
-    // Native host not available — show error details
-    setupView.querySelector("p").innerHTML =
-      'Native host not connected.<br><code style="background:#1a1a2e;padding:4px 8px;border-radius:4px;color:#e74c3c;font-size:12px;display:block;margin-top:8px;word-break:break-all;">' +
-      (e.message || String(e)) + '</code>';
-    setupView.querySelector("button").style.display = "none";
+    // Native host not available — show friendly error
+    const msg = (e.message || String(e)).toLowerCase();
+    const isServerDown = msg.includes("fetch") || msg.includes("network") || msg.includes("connect");
+
+    document.getElementById("state-icon").textContent = isServerDown ? "🔌" : "⚠️";
+    document.getElementById("state-title").textContent = isServerDown
+      ? "Server is warming up"
+      : "Couldn't load your plan";
+    document.getElementById("state-message").innerHTML = isServerDown
+      ? 'The local server isn\'t running yet. Start it up and this page will connect automatically.<br><a href="https://github.com/alekpaul/focus-guard-daily-note#setup" target="_blank" style="color:#9a8aff;font-size:12px;margin-top:8px;display:inline-block;">Need help? View setup guide →</a>'
+      : "Something went wrong connecting to your vault. Give it another shot.";
+    document.getElementById("retry-btn").style.display = "inline-block";
+
+    // Auto-retry every 3 seconds
+    const retryInterval = setInterval(async () => {
+      try {
+        await createTodayNote();
+        clearInterval(retryInterval);
+        location.reload();
+      } catch {}
+    }, 3000);
   }
 }
 
