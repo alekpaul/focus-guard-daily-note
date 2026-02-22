@@ -314,15 +314,7 @@
     html.light .setup-prompt .retry-btn { background: #6c5ce7; }
     html.light .setup-prompt .retry-btn:hover { background: #5a4bd1; }
   </style>
-  <script>
-    (function() {
-      const mq = window.matchMedia('(prefers-color-scheme: light)');
-      function apply() { document.documentElement.classList.toggle('light', mq.matches); }
-      apply();
-      mq.addEventListener('change', apply);
-      setInterval(apply, 1000);
-    })();
-  </script>
+  <script src="theme.js"></script>
 </head>
 <body>
   <div class="container">

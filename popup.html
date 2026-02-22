@@ -383,15 +383,7 @@
     html.light .server-down-msg .title { color: #111; }
     html.light .server-down-msg p { color: #666; }
   </style>
-  <script>
-    (function() {
-      const mq = window.matchMedia('(prefers-color-scheme: light)');
-      function apply() { document.documentElement.classList.toggle('light', mq.matches); }
-      apply();
-      mq.addEventListener('change', apply);
-      setInterval(apply, 1000);
-    })();
-  </script>
+  <script src="theme.js"></script>
 </head>
 <body>
   <!-- Onboarding (shown when vault not configured) -->
