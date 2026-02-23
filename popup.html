@@ -24,6 +24,14 @@
       font-size: 15px;
       font-weight: 600;
       color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header h2 .app-icon {
+      width: 18px;
+      height: 18px;
     }
 
     .toggle {
@@ -389,7 +397,7 @@
   <!-- Onboarding (shown when vault not configured) -->
   <div id="onboarding-view" style="display:none;">
     <div class="header">
-      <h2>Focus Guard</h2>
+      <h2><img class="app-icon" src="icons/icon-48.png" alt="">Focus Guard</h2>
     </div>
     <div class="onboarding">
       <p>Set your Obsidian vault folder<br>to get started</p>
@@ -403,7 +411,7 @@
   <!-- Main UI (shown when configured) -->
   <div id="main-view" style="display:none;">
     <div class="header">
-      <h2>Focus Guard</h2>
+      <h2><img class="app-icon" src="icons/icon-48.png" alt="">Focus Guard</h2>
       <label class="toggle">
         <input type="checkbox" id="toggle-enabled" checked>
         <span class="toggle-slider"></span>
