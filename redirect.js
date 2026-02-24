@@ -42,7 +42,6 @@ const editor = new BlockEditor(editorContainer, {
 
 // --- Debounced auto-save ---
 function debouncedSave(md) {
-  if (viewingDate) return; // Don't save when viewing past notes
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(() => doSave(md), 600);
 }
@@ -50,7 +49,11 @@ function debouncedSave(md) {
 async function doSave(md) {
   showStatus("Saving...", "saving");
   try {
-    await saveTodayNote(md);
+    if (viewingDate) {
+      await saveNote(viewingDate, md);
+    } else {
+      await saveTodayNote(md);
+    }
     showStatus("Saved", "saved");
   } catch (e) {
     showStatus("Save failed", "error");
@@ -123,7 +126,6 @@ async function viewPastNote(dateStr) {
 
   viewingDate = dateStr;
   editor.load(content);
-  editor.setReadOnly(true);
   noteCard.classList.add("past-note");
   noteTitle.textContent = formatDateLabel(dateStr);
   backToToday.style.display = "inline";

@@ -24,6 +24,14 @@ async function saveTodayNote(content) {
   });
 }
 
+async function saveNote(dateStr, content) {
+  await fetch(API + "/note/" + dateStr, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ content }),
+  });
+}
+
 async function createTodayNote() {
   const res = await fetch(API + "/note");
   return await res.json();
@@ -34,11 +42,12 @@ async function getConfig() {
   return await res.json();
 }
 
-async function saveConfig(vault) {
+async function saveConfig(vaultOrObj) {
+  const body = typeof vaultOrObj === "string" ? { vault: vaultOrObj } : vaultOrObj;
   const res = await fetch(API + "/config", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ vault }),
+    body: JSON.stringify(body),
   });
   return await res.json();
 }

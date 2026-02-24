@@ -95,26 +95,45 @@ def calculate_streak():
     return {"currentStreak": current, "days": days}
 
 
-def extract_uncompleted_tasks(filepath):
-    """Return list of uncompleted task texts from a note file."""
+def extract_tasks(filepath):
+    """Return (uncompleted, completed) task text lists from a note file."""
     if not os.path.exists(filepath):
-        return []
+        return [], []
     with open(filepath, "r", encoding="utf-8") as f:
         content = f.read()
-    return re.findall(r"^- \[ \]\s+(.+)$", content, re.MULTILINE)
+    uncompleted = re.findall(r"^- \[ \]\s+(.+)$", content, re.MULTILINE)
+    completed = re.findall(r"^- \[[xX]\]\s+(.+)$", content, re.MULTILINE)
+    return uncompleted, completed
 
 
 def get_carryover_tasks():
-    """Scan back up to 7 days for uncompleted tasks, deduplicated."""
+    """Scan back up to 7 days for uncompleted tasks, deduplicated.
+    Tasks completed on any day in the window are excluded."""
+    cfg = load_config()
+    if not cfg.get("carryover", True):
+        return []
+
     today = date.today()
     seen = set()
+    completed_all = set()
     tasks = []
+
+    # First pass: collect all completed tasks across the window
     for i in range(1, 8):
         d = today - timedelta(days=i)
-        for task in extract_uncompleted_tasks(note_path_for(d)):
-            if task not in seen:
-                seen.add(task)
-                tasks.append(task)
+        _, completed = extract_tasks(note_path_for(d))
+        completed_all.update(completed)
+
+    # Second pass: collect uncompleted tasks, skipping completed ones
+    for i in range(1, 8):
+        d = today - timedelta(days=i)
+        uncompleted, _ = extract_tasks(note_path_for(d))
+        for task in uncompleted:
+            # Skip tasks completed on any day, headings, or empty tasks
+            if task in completed_all or task in seen or task.startswith("#"):
+                continue
+            seen.add(task)
+            tasks.append(task)
     return tasks
 
 
@@ -147,7 +166,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
         if self.path == "/config":
             cfg = load_config()
-            self._json(200, {"ok": True, "vault": cfg.get("vault", ""), "vaultName": cfg.get("vaultName", "")})
+            self._json(200, {"ok": True, "vault": cfg.get("vault", ""), "vaultName": cfg.get("vaultName", ""), "carryover": cfg.get("carryover", True)})
             return
 
         if self.path == "/streak":
@@ -193,23 +212,31 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if self.path == "/config":
             length = int(self.headers.get("Content-Length", 0))
             body = json.loads(self.rfile.read(length))
-            vault_path = body.get("vault", "").strip()
-            if not vault_path or not os.path.isdir(vault_path):
-                self._json(400, {"ok": False, "error": "Folder not found"})
-                return
-            vault_name = os.path.basename(vault_path)
             cfg = load_config()
-            cfg["vault"] = vault_path
-            cfg["vaultName"] = vault_name
+            vault_path = body.get("vault", "").strip()
+            if vault_path:
+                if not os.path.isdir(vault_path):
+                    self._json(400, {"ok": False, "error": "Folder not found"})
+                    return
+                cfg["vault"] = vault_path
+                cfg["vaultName"] = os.path.basename(vault_path)
+            if "carryover" in body:
+                cfg["carryover"] = bool(body["carryover"])
             save_config(cfg)
-            self._json(200, {"ok": True, "vault": vault_path, "vaultName": vault_name})
+            self._json(200, {"ok": True, "vault": cfg.get("vault", ""), "vaultName": cfg.get("vaultName", ""), "carryover": cfg.get("carryover", True)})
             return
 
-        if self.path == "/note":
+        # Save today's note or a specific date's note
+        note_post_match = re.match(r"^/note(?:/(\d{4}-\d{2}-\d{2}))?$", self.path)
+        if note_post_match:
             length = int(self.headers.get("Content-Length", 0))
             body = json.loads(self.rfile.read(length))
             content = body.get("content", "")
-            path = get_note_path()
+            date_str = note_post_match.group(1)
+            if date_str:
+                path = os.path.join(get_vault(), "Progress", f"{date_str}.md")
+            else:
+                path = get_note_path()
             os.makedirs(os.path.dirname(path), exist_ok=True)
             try:
                 with open(path, "w", encoding="utf-8") as f:

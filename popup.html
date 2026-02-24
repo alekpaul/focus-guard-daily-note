@@ -54,8 +54,9 @@
     .toggle-slider::before {
       content: "";
       position: absolute;
-      height: 18px;
-      width: 18px;
+      height: 76%;
+      width: auto;
+      aspect-ratio: 1;
       left: 3px;
       bottom: 3px;
       background: #888;
@@ -439,6 +440,14 @@
         <option value="10">10 min</option>
         <option value="15">15 min</option>
       </select>
+    </div>
+
+    <div class="setting-row">
+      <span>Carry over tasks</span>
+      <label class="toggle" style="width:36px;height:20px;">
+        <input type="checkbox" id="carryover-toggle" checked>
+        <span class="toggle-slider" style="border-radius:20px;"></span>
+      </label>
     </div>
 
     <p class="section-label">Blocked sites</p>

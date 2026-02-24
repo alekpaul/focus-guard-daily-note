@@ -29,13 +29,13 @@ document.getElementById("save-vault-btn").addEventListener("click", async () => 
 });
 
 // --- Show main UI ---
-function showMain(vaultName) {
+function showMain(vaultName, cfg) {
   onboardingView.style.display = "none";
   mainView.style.display = "block";
-  initMain(vaultName);
+  initMain(vaultName, cfg);
 }
 
-function initMain(vaultName) {
+function initMain(vaultName, cfg) {
   const siteListEl = document.getElementById("site-list");
   const newSiteInput = document.getElementById("new-site");
   const addBtn = document.getElementById("add-btn");
@@ -88,6 +88,10 @@ function initMain(vaultName) {
 
   // --- Bypass duration ---
   const bypassSelect = document.getElementById("bypass-duration");
+  const carryoverToggle = document.getElementById("carryover-toggle");
+
+  // --- Carryover initial state ---
+  carryoverToggle.checked = cfg && cfg.carryover !== undefined ? cfg.carryover : true;
 
   // --- Toggle + settings ---
   chrome.storage.sync.get(["blockedSites", "enabled", "bypassMinutes"], (data) => {
@@ -102,6 +106,10 @@ function initMain(vaultName) {
 
   bypassSelect.addEventListener("change", () => {
     chrome.storage.sync.set({ bypassMinutes: Number(bypassSelect.value) });
+  });
+
+  carryoverToggle.addEventListener("change", () => {
+    saveConfig({ carryover: carryoverToggle.checked });
   });
 
   // --- Site list ---
@@ -153,7 +161,7 @@ function initMain(vaultName) {
   try {
     const cfg = await getConfig();
     if (cfg.vault) {
-      showMain(cfg.vaultName || "Obsidian");
+      showMain(cfg.vaultName || "Obsidian", cfg);
     } else {
       onboardingView.style.display = "block";
     }
