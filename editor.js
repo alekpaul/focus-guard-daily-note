@@ -17,6 +17,21 @@ class BlockEditor {
   // --- Unique IDs ---
   _id() { return "b" + (++this._uid); }
 
+  // --- URL linkification ---
+  _escapeHtml(text) {
+    const el = document.createElement("span");
+    el.textContent = text;
+    return el.innerHTML;
+  }
+
+  _linkify(text) {
+    const escaped = this._escapeHtml(text);
+    return escaped.replace(
+      /https?:\/\/[^\s<>]+/g,
+      '<a href="$&" class="inline-link">$&</a>'
+    );
+  }
+
   // --- Markdown ↔ Blocks ---
   parseMarkdown(md) {
     const lines = md.split("\n");
@@ -189,7 +204,7 @@ class BlockEditor {
     content.className = "block-content";
     content.contentEditable = "true";
     content.spellcheck = true;
-    content.textContent = block.content;
+    content.innerHTML = this._linkify(block.content);
     content.dataset.placeholder = this._getPlaceholder(block.type);
 
     content.addEventListener("input", () => {
@@ -201,7 +216,17 @@ class BlockEditor {
     content.addEventListener("keydown", (e) => this._onKeyDown(e, block));
     content.addEventListener("paste", (e) => this._onPaste(e, block));
     content.addEventListener("focus", () => row.classList.add("focused"));
-    content.addEventListener("blur", () => row.classList.remove("focused"));
+    content.addEventListener("blur", () => {
+      row.classList.remove("focused");
+      block.content = content.textContent;
+      content.innerHTML = this._linkify(block.content);
+    });
+    content.addEventListener("click", (e) => {
+      if (e.target.tagName === "A" && e.target.classList.contains("inline-link")) {
+        e.preventDefault();
+        window.open(e.target.href, "_blank");
+      }
+    });
 
     row.appendChild(content);
     return row;
@@ -547,15 +572,25 @@ class BlockEditor {
       if (caretPos !== undefined) {
         const range = document.createRange();
         const sel = window.getSelection();
-        const textNode = el.firstChild;
 
-        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-          const pos = Math.min(caretPos, textNode.length);
-          range.setStart(textNode, pos);
-          range.collapse(true);
-        } else {
+        // Walk text nodes to find the right position (handles mixed text + <a> nodes)
+        let remaining = caretPos;
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+        let node;
+        let found = false;
+        while (node = walker.nextNode()) {
+          if (remaining <= node.length) {
+            range.setStart(node, remaining);
+            range.collapse(true);
+            found = true;
+            break;
+          }
+          remaining -= node.length;
+        }
+
+        if (!found) {
           range.selectNodeContents(el);
-          range.collapse(caretPos === 0);
+          range.collapse(caretPos !== 0);
         }
 
         sel.removeAllRanges();
